@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard – PediaCare Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+
+</head>
+<body>
+<div class="layout">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <h2>PediaCare</h2>
+      <p>Admin Portal</p>
+    </div>
+    <nav>
+      <a href="{{ url_for('admin.dashboard') }}" class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+          <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+        </svg>
+        Dashboard
+      </a>
+      <a href="{{ url_for('admin.dashboard', status='pending') }}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+        </svg>
+        Appointment ({{ counts.pending }})
+      </a>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="sidebar-user">
+        Logged in as<strong>{{ current_user.full_name }}</strong>
+      </div>
+      <a href="{{ url_for('admin.logout') }}" class="logout-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
+        </svg>
+        Sign out
+      </a>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <h1>Appointments</h1>
+        <div class="topbar-sub">Manage and respond to patient appointment requests</div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endwith %}
+
+      <!-- Stat cards -->
+      <div class="stat-grid">
+        <a href="{{ url_for('admin.dashboard') }}" class="stat-card {% if status_filter == 'all' %}active-filter{% endif %}">
+          <div class="stat-num">{{ counts.all }}</div>
+          <div class="stat-label">All</div>
+        </a>
+        <a href="{{ url_for('admin.dashboard', status='pending') }}" class="stat-card {% if status_filter == 'pending' %}active-filter{% endif %}">
+          <div class="stat-num">{{ counts.pending }}</div>
+          <div class="stat-label"><span class="stat-dot" style="background:#856404"></span>Pending</div>
+        </a>
+        <a href="{{ url_for('admin.dashboard', status='approved') }}" class="stat-card {% if status_filter == 'approved' %}active-filter{% endif %}">
+          <div class="stat-num">{{ counts.approved }}</div>
+          <div class="stat-label"><span class="stat-dot" style="background:#155724"></span>Approved</div>
+        </a>
+        <a href="{{ url_for('admin.dashboard', status='rescheduled') }}" class="stat-card {% if status_filter == 'rescheduled' %}active-filter{% endif %}">
+          <div class="stat-num">{{ counts.rescheduled }}</div>
+          <div class="stat-label"><span class="stat-dot" style="background:#0C5460"></span>Rescheduled</div>
+        </a>
+        <a href="{{ url_for('admin.dashboard', status='cancelled') }}" class="stat-card {% if status_filter == 'cancelled' %}active-filter{% endif %}">
+          <div class="stat-num">{{ counts.cancelled }}</div>
+          <div class="stat-label"><span class="stat-dot" style="background:#721C24"></span>Cancelled</div>
+        </a>
+      </div>
+
+      <!-- Appointments table -->
+      <div class="table-wrap">
+        {% if appointments %}
+        <table>
+          <thead>
+            <tr>
+              <th>Ref #</th>
+              <th>Child</th>
+              <th>Guardian</th>
+              <th>Preferred Date</th>
+              <th>Reason</th>
+              <th>Status</th>
+              <th>Submitted</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for apt in appointments %}
+            <tr>
+              <td><span class="ref">{{ apt.reference_number }}</span></td>
+              <td>
+                <div class="child-name">{{ apt.child_full_name }}</div>
+                <div class="sub-text">{{ apt.child_sex }} · DOB {{ apt.child_dob.strftime('%b %d, %Y') }}</div>
+              </td>
+              <td>
+                <div>{{ apt.guardian.full_name }}</div>
+                <div class="sub-text">{{ apt.guardian.phone }}</div>
+              </td>
+              <td>
+                <div>{{ apt.preferred_date.strftime('%b %d, %Y') }}</div>
+                <div class="sub-text">{{ apt.preferred_time }}</div>
+              </td>
+              <td>{{ apt.reason }}</td>
+              <td><span class="badge {{ apt.status_badge }}">{{ apt.status | capitalize }}</span></td>
+              <td><div class="sub-text">{{ apt.created_at.strftime('%b %d, %Y') }}</div></td>
+              <td>
+                <a href="{{ url_for('admin.appointment_detail', appointment_id=apt.id) }}" class="action-btn">
+                  Review
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="empty">No appointments found.</div>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+</div>
+</body>
+</html>

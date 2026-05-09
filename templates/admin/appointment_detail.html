@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Appointment {{ appointment.reference_number }} – PediaCare Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/appointment_det.css') }}">
+</head>
+<body>
+<div class="layout">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <h2>PediaCare</h2>
+      <p>Admin Portal</p>
+    </div>
+    <nav>
+      <a href="{{ url_for('admin.dashboard') }}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+          <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+        </svg>
+        Dashboard
+      </a>
+      <a href="{{ url_for('admin.dashboard', status='pending') }}" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+        </svg>
+        Appointment ({{ counts.pending }})
+      </a>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="sidebar-user">
+        Logged in as<strong>{{ current_user.full_name }}</strong>
+      </div>
+      <a href="{{ url_for('admin.logout') }}" class="logout-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
+        </svg>
+        Sign out
+      </a>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <a href="{{ url_for('admin.dashboard') }}" class="back-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M19 12H5M11 6l-6 6 6 6"/>
+        </svg>
+        Dashboard
+      </a>
+      <span class="topbar-divider">/</span>
+      <h1>{{ appointment.reference_number }}</h1>
+      <span class="badge {{ appointment.status_badge }}">{{ appointment.status | capitalize }}</span>
+    </div>
+
+    <div class="content">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endwith %}
+
+      <div class="grid">
+
+        <!-- LEFT: Appointment info -->
+        <div>
+
+          <!-- Guardian -->
+          <div class="card">
+            <div class="card-head">
+              <div class="card-head-title">Guardian Information</div>
+            </div>
+            <div class="card-body">
+              <div class="info-row">
+                <span class="info-label">Name</span>
+                <span class="info-value">{{ appointment.guardian.full_name }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Relationship</span>
+                <span class="info-value">{{ appointment.guardian.relationship }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Mobile</span>
+                <span class="info-value">{{ appointment.guardian.phone }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Email</span>
+                <span class="info-value">{{ appointment.guardian.email or '—' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Child -->
+          <div class="card">
+            <div class="card-head">
+              <div class="card-head-title">Child / Patient</div>
+            </div>
+            <div class="card-body">
+              <div class="info-row">
+                <span class="info-label">Name</span>
+                <span class="info-value">{{ appointment.child_full_name }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Date of Birth</span>
+                <span class="info-value">{{ appointment.child_dob.strftime('%B %d, %Y') }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Sex</span>
+                <span class="info-value">{{ appointment.child_sex }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Reason</span>
+                <span class="info-value">{{ appointment.reason }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Visit type</span>
+                <span class="info-value">{{ appointment.visit_type }}</span>
+              </div>
+              {% if appointment.notes %}
+              <div class="info-row" style="flex-direction:column;gap:8px">
+                <span class="info-label">Notes from guardian</span>
+                <div class="notes-box">{{ appointment.notes }}</div>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Schedule -->
+          <div class="card">
+            <div class="card-head">
+              <div class="card-head-title">Requested Schedule</div>
+            </div>
+            <div class="card-body">
+              <div class="info-row">
+                <span class="info-label">Preferred date</span>
+                <span class="info-value">{{ appointment.preferred_date.strftime('%B %d, %Y') }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Preferred time</span>
+                <span class="info-value">{{ appointment.preferred_time }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Alt. date</span>
+                <span class="info-value">
+                  {{ appointment.alt_date.strftime('%B %d, %Y') if appointment.alt_date else '—' }}
+                </span>
+              </div>
+              {% if appointment.confirmed_date %}
+              <div class="info-row">
+                <span class="info-label">Confirmed date</span>
+                <span class="info-value" style="color:var(--primary);font-weight:500">
+                  {{ appointment.confirmed_date.strftime('%B %d, %Y') }} at {{ appointment.confirmed_time }}
+                </span>
+              </div>
+              {% endif %}
+              <div class="info-row">
+                <span class="info-label">Submitted</span>
+                <span class="info-value">{{ appointment.created_at.strftime('%B %d, %Y %I:%M %p') }}</span>
+              </div>
+            </div>
+          </div>
+
+          {% if appointment.admin_notes %}
+          <div class="card">
+            <div class="card-head"><div class="card-head-title">Doctor Notes</div></div>
+            <div class="card-body">
+              <div class="notes-box">{{ appointment.admin_notes }}</div>
+            </div>
+          </div>
+          {% endif %}
+
+        </div>
+
+        <!-- RIGHT: Actions -->
+        <div>
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.6px;color:var(--muted);margin-bottom:12px;font-weight:500;">
+            Actions
+          </div>
+
+          {% if appointment.status in ['pending', 'rescheduled'] %}
+
+          <!-- APPROVE -->
+          <div class="action-section">
+            <div class="action-head" onclick="toggleAction('approve')">
+              <div class="action-icon green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                  <path d="M20 6L9 17l-5-5"/>
+                </svg>
+              </div>
+              <span class="action-title">Approve Appointment</span>
+            </div>
+            <div class="action-body" id="action-approve">
+              <form method="POST" action="{{ url_for('admin.approve', appointment_id=appointment.id) }}">
+                <div class="row2">
+                  <div class="field">
+                    <label class="field-label">Confirmed date <span style="color:#C0392B">*</span></label>
+                    <input type="date" name="confirmed_date" value="{{ appointment.preferred_date }}" required>
+                  </div>
+                  <div class="field">
+                    <label class="field-label">Confirmed time <span style="color:#C0392B">*</span></label>
+                    <select name="confirmed_time" required>
+                      <option value="">Select time</option>
+                      {% set times = ['8:00 AM – 9:00 AM','9:00 AM – 10:00 AM','10:00 AM – 11:00 AM',
+                                      '11:00 AM – 12:00 PM','1:00 PM – 2:00 PM','2:00 PM – 3:00 PM',
+                                      '3:00 PM – 4:00 PM','4:00 PM – 5:00 PM'] %}
+                      {% for t in times %}
+                        <option value="{{ t }}" {% if t == appointment.preferred_time %}selected{% endif %}>{{ t }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                <div class="field" style="margin-top:12px">
+                  <label class="field-label">Notes (optional)</label>
+                  <textarea name="admin_notes" placeholder="Any instructions for the patient..."></textarea>
+                </div>
+                <button type="submit" class="submit-btn green">Confirm & Notify via SMS</button>
+              </form>
+            </div>
+          </div>
+
+          <!-- RESCHEDULE -->
+          <div class="action-section">
+            <div class="action-head" onclick="toggleAction('reschedule')">
+              <div class="action-icon blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+                </svg>
+              </div>
+              <span class="action-title">Suggest New Schedule</span>
+            </div>
+            <div class="action-body" id="action-reschedule">
+              <form method="POST" action="{{ url_for('admin.reschedule', appointment_id=appointment.id) }}">
+                <div class="row2">
+                  <div class="field">
+                    <label class="field-label">New date <span style="color:#C0392B">*</span></label>
+                    <input type="date" name="new_date" required>
+                  </div>
+                  <div class="field">
+                    <label class="field-label">New time <span style="color:#C0392B">*</span></label>
+                    <select name="new_time" required>
+                      <option value="">Select time</option>
+                      {% set times = ['8:00 AM – 9:00 AM','9:00 AM – 10:00 AM','10:00 AM – 11:00 AM',
+                                      '11:00 AM – 12:00 PM','1:00 PM – 2:00 PM','2:00 PM – 3:00 PM',
+                                      '3:00 PM – 4:00 PM','4:00 PM – 5:00 PM'] %}
+                      {% for t in times %}
+                        <option value="{{ t }}">{{ t }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                <div class="field" style="margin-top:12px">
+                  <label class="field-label">Reason for rescheduling</label>
+                  <input type="text" name="reason" placeholder="e.g. Doctor unavailable on that date">
+                </div>
+                <div class="field">
+                  <label class="field-label">Admin notes (optional)</label>
+                  <textarea name="admin_notes" placeholder="Internal notes..."></textarea>
+                </div>
+                <button type="submit" class="submit-btn blue">Reschedule & Notify via SMS</button>
+              </form>
+            </div>
+          </div>
+
+          <!-- CANCEL -->
+          <div class="action-section">
+            <div class="action-head" onclick="toggleAction('cancel')">
+              <div class="action-icon red">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/>
+                </svg>
+              </div>
+              <span class="action-title">Cancel Appointment</span>
+            </div>
+            <div class="action-body" id="action-cancel">
+              <form method="POST" action="{{ url_for('admin.cancel', appointment_id=appointment.id) }}">
+                <div class="field">
+                  <label class="field-label">Reason for cancellation</label>
+                  <input type="text" name="reason" placeholder="e.g. Patient no-show, doctor on leave">
+                </div>
+                <div class="field">
+                  <label class="field-label">Admin notes (optional)</label>
+                  <textarea name="admin_notes" placeholder="Internal notes..."></textarea>
+                </div>
+                <button type="submit" class="submit-btn red"
+                  onclick="return confirm('Cancel this appointment and notify the client?')">
+                  Cancel & Notify via SMS
+                </button>
+              </form>
+            </div>
+          </div>
+
+          {% elif appointment.status == 'approved' %}
+          <!-- MARK COMPLETE -->
+          <div class="action-section">
+            <div class="action-head" onclick="toggleAction('complete')">
+              <div class="action-icon gray">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/>
+                </svg>
+              </div>
+              <span class="action-title">Mark as Completed</span>
+            </div>
+            <div class="action-body" id="action-complete">
+              <form method="POST" action="{{ url_for('admin.complete', appointment_id=appointment.id) }}">
+                <p style="font-size:13px;color:var(--muted);margin-bottom:12px">
+                  Mark this appointment as done after the patient's visit.
+                </p>
+                <button type="submit" class="submit-btn gray">Mark as Completed</button>
+              </form>
+            </div>
+          </div>
+
+          {% else %}
+          <div style="background:var(--primary-light);border:1px solid var(--accent);border-radius:10px;
+                      padding:16px;font-size:13px;color:var(--primary);text-align:center;">
+            This appointment is <strong>{{ appointment.status }}</strong>.<br>No further actions available.
+          </div>
+          {% endif %}
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function toggleAction(id) {
+    const body = document.getElementById('action-' + id);
+    const head = body.previousElementSibling;
+    const isOpen = body.classList.contains('open');
+    // Close all
+    document.querySelectorAll('.action-body').forEach(el => el.classList.remove('open'));
+    document.querySelectorAll('.action-head').forEach(el => el.classList.remove('open'));
+    // Open clicked if it was closed
+    if (!isOpen) {
+      body.classList.add('open');
+      head.classList.add('open');
+    }
+  }
+</script>
+</body>
+</html>
