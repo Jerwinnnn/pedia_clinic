@@ -9,10 +9,9 @@ class Config:
 
     # ------------------------------------------------------------------ #
     #  Database — XAMPP MySQL
-    #  Format: mysql+pymysql://user:password@host:port/database_name
     # ------------------------------------------------------------------ #
     MYSQL_USER     = os.environ.get('MYSQL_USER',     'root')
-    MYSQL_PASSWORD = os.environ.get('MYSQL_PASSWORD', '')          # XAMPP default = no password
+    MYSQL_PASSWORD = os.environ.get('MYSQL_PASSWORD', '')
     MYSQL_HOST     = os.environ.get('MYSQL_HOST',     '127.0.0.1')
     MYSQL_PORT     = os.environ.get('MYSQL_PORT',     '3307')
     MYSQL_DB       = os.environ.get('MYSQL_DB',       'pediacare_db')
@@ -24,16 +23,30 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # ------------------------------------------------------------------ #
-    #  SMS — Semaphore (https://semaphore.co)
-    #  Sign up for a free account, get your API key, set it below.
+    #  Email — pick ONE provider below, fill in your credentials
+    #
+    #  OPTION A: Gmail
+    #    MAIL_USERNAME = 'yourname@gmail.com'
+    #    MAIL_PASSWORD = 'xxxx xxxx xxxx xxxx'  ← 16-char App Password
+    #    (Get at: myaccount.google.com → Security → App passwords)
+    #
+    #  OPTION B: Outlook / Hotmail (recommended if Gmail SMTP is blocked)
+    #    MAIL_USERNAME = 'yourname@outlook.com'
+    #    MAIL_PASSWORD = 'your_outlook_password'
+    #    (Enable SMTP at: outlook.com → Settings → Mail → Sync email)
+    #
+    #  OPTION C: Yahoo Mail
+    #    MAIL_USERNAME = 'yourname@yahoo.com'
+    #    MAIL_PASSWORD = 'xxxx xxxx xxxx xxxx'  ← Yahoo App Password
+    #    (Get at: account.yahoo.com → Security → App passwords)
     # ------------------------------------------------------------------ #
-    SEMAPHORE_API_KEY    = os.environ.get('SEMAPHORE_API_KEY', 'YOUR_SEMAPHORE_API_KEY')
-    SEMAPHORE_SENDER     = os.environ.get('SEMAPHORE_SENDER',  'PediaCare')
-    SEMAPHORE_API_URL    = 'https://api.semaphore.co/api/v4/messages'
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME', 'tugasjerwin7@gmail.com')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', 'lufa sqdo xgao ithb')
+    MAIL_FROM     = os.environ.get('MAIL_USERNAME', 'tugasjerwin7@gmail.com')
 
     # ------------------------------------------------------------------ #
-    #  Clinic info (used in SMS messages)
+    #  Clinic info
     # ------------------------------------------------------------------ #
-    CLINIC_NAME    = 'PediaCare Clinic'
-    CLINIC_ADDRESS = 'Your Clinic Address Here'
-    CLINIC_PHONE   = 'Your Clinic Phone Here'
+    CLINIC_NAME    = 'Napalinga\'s Children Clinic'
+    CLINIC_ADDRESS = 'Meycauayan Bulacan'
+    CLINIC_PHONE   = '09123456789'

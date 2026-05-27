@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<title>Patients - Admin</title>
+	<style>
+		body{font-family:Arial,Helvetica,sans-serif;background:#f5f7fb;margin:0;padding:20px}
+		.container{max-width:1100px;margin:0 auto;background:#fff;padding:20px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+		h1{margin:0 0 16px;font-size:22px}
+		.toolbar{display:flex;gap:12px;align-items:center;margin-bottom:16px}
+		.toolbar input[type=search]{flex:1;padding:8px 12px;border:1px solid #d6dbe6;border-radius:6px}
+		.btn{background:#0078d4;color:#fff;padding:8px 12px;border-radius:6px;border:none;cursor:pointer}
+		.btn.secondary{background:#e1e7ef;color:#0b2540}
+		table{width:100%;border-collapse:collapse;margin-top:8px}
+		th,td{padding:10px 8px;border-bottom:1px solid #eef2f7;text-align:left}
+		th{background:#fafcff;font-weight:600}
+		.avatar{width:36px;height:36px;border-radius:50%;background:#cfd8e3;display:inline-block;vertical-align:middle;margin-right:8px}
+		.actions button{margin-right:6px;padding:6px 8px;border-radius:6px;border:1px solid #d6dbe6;background:#fff;cursor:pointer}
+		.pagination{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:12px}
+		/* modal */
+		.modal-backdrop{position:fixed;inset:0;background:rgba(11,18,30,.5);display:none;align-items:center;justify-content:center}
+		.modal{background:#fff;padding:18px;border-radius:8px;max-width:600px;width:100%}
+		.form-row{display:flex;gap:8px}
+		.form-row .field{flex:1;display:flex;flex-direction:column;margin-bottom:8px}
+		label{font-size:13px;margin-bottom:6px;color:#243b53}
+		input,select,textarea{padding:8px;border:1px solid #d6dbe6;border-radius:6px}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<h1>Patients</h1>
+		<div class="toolbar">
+			<input id="search" type="search" placeholder="Search patients by name, email or phone..." />
+			<button id="addBtn" class="btn">+ Add Patient</button>
+			<button id="refreshBtn" class="btn secondary">Refresh</button>
+		</div>
+
+		<table id="patientsTable">
+			<thead>
+				<tr>
+					<th>Patient</th>
+					<th>Contact</th>
+					<th>DOB / Gender</th>
+					<th>Notes</th>
+					<th style="width:160px">Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				<!-- Rows will be rendered by JS -->
+			</tbody>
+		</table>
+
+		<div class="pagination">
+			<div id="pageInfo">0 patients</div>
+			<button id="prevPage" class="btn secondary">Prev</button>
+			<button id="nextPage" class="btn">Next</button>
+		</div>
+	</div>
+
+	<div id="modalBackdrop" class="modal-backdrop">
+		<div class="modal" role="dialog" aria-modal="true">
+			<h2 id="modalTitle">Add Patient</h2>
+			<form id="patientForm">
+				<div class="form-row">
+					<div class="field"><label for="firstName">First Name</label><input id="firstName" name="firstName" required /></div>
+					<div class="field"><label for="lastName">Last Name</label><input id="lastName" name="lastName" required /></div>
+				</div>
+				<div class="form-row">
+					<div class="field"><label for="email">Email</label><input id="email" name="email" type="email" /></div>
+					<div class="field"><label for="phone">Phone</label><input id="phone" name="phone" /></div>
+				</div>
+				<div class="form-row">
+					<div class="field"><label for="dob">Date of Birth</label><input id="dob" name="dob" type="date" /></div>
+					<div class="field"><label for="gender">Gender</label><select id="gender" name="gender"><option></option><option>Female</option><option>Male</option><option>Other</option></select></div>
+				</div>
+				<div class="field"><label for="notes">Notes</label><textarea id="notes" name="notes" rows="3"></textarea></div>
+				<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+					<button type="button" id="cancelBtn" class="btn secondary">Cancel</button>
+					<button type="submit" class="btn">Save</button>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<script>
+		// minimal client-side data to demonstrate UI
+		let patients = [
+			{id:1,firstName:'Alice',lastName:'Brown',email:'alice@example.com',phone:'555-0101',dob:'1990-05-12',gender:'Female',notes:'Diabetic'},
+			{id:2,firstName:'Bob',lastName:'Smith',email:'bob@example.com',phone:'555-0202',dob:'1985-11-03',gender:'Male',notes:''}
+		];
+		let page=1, perPage=10;
+
+		const tbody=document.querySelector('#patientsTable tbody');
+		const pageInfo=document.getElementById('pageInfo');
+
+		function render(){
+			const start=(page-1)*perPage; const items=patients.slice(start,start+perPage);
+			tbody.innerHTML='';
+			for(const p of items){
+				const tr=document.createElement('tr');
+				tr.innerHTML=`
+					<td><span class="avatar"></span><strong>${p.firstName} ${p.lastName}</strong><div style="font-size:12px;color:#6b778a">ID: ${p.id}</div></td>
+					<td>${p.email||''}<div style="font-size:12px;color:#6b778a">${p.phone||''}</div></td>
+					<td>${p.dob||''}<div style="font-size:12px;color:#6b778a">${p.gender||''}</div></td>
+					<td style="font-size:13px;color:#223344">${p.notes||''}</td>
+					<td class="actions"><button onclick="edit(${p.id})">Edit</button><button onclick="remove(${p.id})">Delete</button></td>
+				`;
+				tbody.appendChild(tr);
+			}
+			pageInfo.textContent=`${patients.length} patients`;
+		}
+
+		function edit(id){
+			const p=patients.find(x=>x.id===id); if(!p) return;
+			openModal('Edit Patient',p);
+		}
+		function remove(id){ if(!confirm('Delete patient?')) return; patients=patients.filter(x=>x.id!==id); render(); }
+
+		// modal
+		const modalBackdrop=document.getElementById('modalBackdrop');
+		const patientForm=document.getElementById('patientForm');
+		let editingId=null;
+		document.getElementById('addBtn').addEventListener('click',()=>openModal('Add Patient'));
+		document.getElementById('cancelBtn').addEventListener('click',closeModal);
+		document.getElementById('refreshBtn').addEventListener('click',render);
+
+		function openModal(title,data){
+			document.getElementById('modalTitle').textContent=title;
+			modalBackdrop.style.display='flex';
+			editingId=null;
+			patientForm.reset();
+			if(data){editingId=data.id; document.getElementById('firstName').value=data.firstName||'';document.getElementById('lastName').value=data.lastName||'';document.getElementById('email').value=data.email||'';document.getElementById('phone').value=data.phone||'';document.getElementById('dob').value=data.dob||'';document.getElementById('gender').value=data.gender||'';document.getElementById('notes').value=data.notes||''}
+		}
+		function closeModal(){ modalBackdrop.style.display='none'; }
+
+		patientForm.addEventListener('submit',function(e){
+			e.preventDefault();
+			const form=new FormData(patientForm);
+			const obj={
+				id: editingId|| (patients.length?Math.max(...patients.map(p=>p.id))+1:1),
+				firstName:form.get('firstName'), lastName:form.get('lastName'), email:form.get('email'), phone:form.get('phone'), dob:form.get('dob'), gender:form.get('gender'), notes:form.get('notes')
+			};
+			if(editingId){ patients=patients.map(p=>p.id===editingId?obj:p); } else { patients.unshift(obj); }
+			closeModal(); render();
+		});
+
+		document.getElementById('search').addEventListener('input',function(e){
+			const q=e.target.value.toLowerCase().trim();
+			if(!q){ render(); return; }
+			const filtered=patients.filter(p=>`${p.firstName} ${p.lastName}`.toLowerCase().includes(q) || (p.email||'').toLowerCase().includes(q) || (p.phone||'').toLowerCase().includes(q));
+			tbody.innerHTML='';
+			for(const p of filtered){
+				const tr=document.createElement('tr');
+				tr.innerHTML=`<td><span class="avatar"></span><strong>${p.firstName} ${p.lastName}</strong></td><td>${p.email||''}</td><td>${p.dob||''}</td><td>${p.notes||''}</td><td class="actions"><button onclick="edit(${p.id})">Edit</button><button onclick="remove(${p.id})">Delete</button></td>`;
+				tbody.appendChild(tr);
+			}
+			pageInfo.textContent=`${filtered.length} results`;
+		});
+
+		// pagination handlers (simple)
+		document.getElementById('prevPage').addEventListener('click',()=>{ if(page>1){page--;render();} });
+		document.getElementById('nextPage').addEventListener('click',()=>{ if(page*perPage<patients.length){page++;render();} });
+
+		// expose edit/remove for inline handlers
+		window.edit=edit; window.remove=remove;
+
+		render();
+	</script>
+</body>
+</html>

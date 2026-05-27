@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Appointments – PediaCare Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+<style>
+/* Search bar */
+.search-bar {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 16px;
+}
+.search-input-wrap {
+  position: relative; flex: 1;
+}
+.search-icon {
+  position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+  width: 15px; height: 15px; color: var(--muted); pointer-events: none;
+}
+.search-input {
+  width: 100%; padding: 10px 40px 10px 38px;
+  border: 1.5px solid var(--border); border-radius: 9px;
+  font-family: 'DM Sans', sans-serif; font-size: 13.5px; color: var(--text);
+  outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+  background: var(--surface);
+}
+.search-input:focus {
+  border-color: var(--primary-mid);
+  box-shadow: 0 0 0 3px rgba(42,122,98,0.1);
+}
+.search-input::placeholder { color: #aac4bc; }
+.search-clear {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  width: 18px; height: 18px; color: var(--muted); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; transition: all 0.15s;
+}
+.search-clear:hover { background: var(--border); color: var(--text); }
+.search-clear svg { width: 12px; height: 12px; }
+.search-btn {
+  padding: 10px 22px; background: var(--primary); border: none; border-radius: 9px;
+  font-family: 'DM Sans', sans-serif; font-size: 13.5px; font-weight: 500;
+  color: #fff; cursor: pointer; transition: background 0.18s; white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(27,94,75,0.2);
+}
+.search-btn:hover { background: var(--primary-mid); }
+
+/* Highlight matched text */
+mark {
+  background: #FEF3CD; color: #78430A;
+  border-radius: 3px; padding: 0 2px; font-weight: 600;
+}
+/* No results */
+.no-results {
+  text-align: center; padding: 56px 20px;
+}
+.no-results svg { width: 40px; height: 40px; color: var(--border); display: block; margin: 0 auto 12px; }
+.no-results p { color: var(--muted); font-size: 14px; margin-bottom: 12px; }
+.no-results a { color: var(--primary); text-decoration: none; font-size: 13px; }
+.no-results a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        <path d="M9 12l2 2 4-4"/>
+      </svg>
+    </div>
+    <div>
+      <div class="brand-name">Napalinga's Children</div>
+      <div class="brand-sub">Clinic</div>
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Overview</div>
+    <a href="{{ url_for('admin.dashboard') }}" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+        <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+      </svg>Dashboard
+    </a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Appointments</div>
+    <a href="{{ url_for('admin.appointments') }}" class="nav-item {% if status_filter == 'all' %}active{% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+      </svg>All Appointments
+    </a>
+    <a href="{{ url_for('admin.appointments', status='pending') }}" class="nav-item {% if status_filter == 'pending' %}active{% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+      </svg>Pending
+      {% if counts.pending > 0 %}<span class="nav-badge">{{ counts.pending }}</span>{% endif %}
+    </a>
+    <a href="{{ url_for('admin.appointments', status='approved') }}" class="nav-item {% if status_filter == 'approved' %}active{% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/>
+      </svg>Approved
+    </a>
+    <a href="{{ url_for('admin.appointments', status='rescheduled') }}" class="nav-item {% if status_filter == 'rescheduled' %}active{% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+      </svg>Rescheduled
+    </a>
+    <a href="{{ url_for('admin.appointments', status='cancelled') }}" class="nav-item {% if status_filter == 'cancelled' %}active{% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/>
+      </svg>Cancelled
+    </a>
+    <a href="{{ url_for('admin.appointments', status='completed') }}" class="nav-item {% if status_filter == 'completed' %}active{% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+      </svg>Completed
+    </a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Settings</div>
+    <a href="{{ url_for('admin.users') }}" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      User Management
+    </a>
+  </div>
+
+  <div class="sidebar-foot">
+    <div class="user-card">
+      <div class="user-avatar">{{ current_user.full_name[0] | upper }}</div>
+      <div>
+        <div class="user-name">{{ current_user.full_name }}</div>
+        <div class="user-role">Clinic Assistant</div>
+      </div>
+    </div>
+    <a href="{{ url_for('admin.logout') }}" class="logout-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
+      </svg>Sign out
+    </a>
+  </div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>Appointments</h1>
+      <p>Manage and respond to patient appointment requests</p>
+    </div>
+    <div class="topbar-date" id="live-date"></div>
+  </div>
+
+  <div class="content">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">
+          {% if category == 'success' %}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+          {% else %}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+          {% endif %}
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endwith %}
+
+    <!-- Stat cards -->
+    <div class="stat-grid">
+      <a href="{{ url_for('admin.appointments') }}" class="stat-card {% if status_filter == 'all' %}active-filter{% endif %}">
+        <div class="stat-icon si-all"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
+        <div class="stat-num">{{ counts.all }}</div>
+        <div class="stat-label">Total</div>
+      </a>
+      <a href="{{ url_for('admin.appointments', status='pending') }}" class="stat-card c-pending {% if status_filter == 'pending' %}active-filter{% endif %}">
+        <div class="stat-icon si-pend"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+        <div class="stat-num">{{ counts.pending }}</div>
+        <div class="stat-label">Pending</div>
+      </a>
+      <a href="{{ url_for('admin.appointments', status='approved') }}" class="stat-card c-approved {% if status_filter == 'approved' %}active-filter{% endif %}">
+        <div class="stat-icon si-appr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+        <div class="stat-num">{{ counts.approved }}</div>
+        <div class="stat-label">Approved</div>
+      </a>
+      <a href="{{ url_for('admin.appointments', status='rescheduled') }}" class="stat-card c-rescheduled {% if status_filter == 'rescheduled' %}active-filter{% endif %}">
+        <div class="stat-icon si-resc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
+        <div class="stat-num">{{ counts.rescheduled }}</div>
+        <div class="stat-label">Rescheduled</div>
+      </a>
+      <a href="{{ url_for('admin.appointments', status='cancelled') }}" class="stat-card c-cancelled {% if status_filter == 'cancelled' %}active-filter{% endif %}">
+        <div class="stat-icon si-canc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></div>
+        <div class="stat-num">{{ counts.cancelled }}</div>
+        <div class="stat-label">Cancelled</div>
+      </a>
+    </div>
+
+    <!-- Search + Filter -->
+    <form method="GET" action="{{ url_for('admin.appointments') }}" id="search-form">
+      <input type="hidden" name="status" value="{{ status_filter }}">
+
+      <div class="search-bar">
+        <div class="search-input-wrap">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+          </svg>
+          <input
+            type="text"
+            name="q"
+            id="search-input"
+            class="search-input"
+            placeholder="Search by reference #, patient name, or guardian name..."
+            value="{{ search_query }}"
+            autocomplete="off"
+          >
+          {% if search_query %}
+          <a href="{{ url_for('admin.appointments', status=status_filter) }}" class="search-clear" title="Clear search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </a>
+          {% endif %}
+        </div>
+        <button type="submit" class="search-btn">Search</button>
+      </div>
+    </form>
+
+    <div class="table-header">
+      <div class="table-title">
+        {% if search_query %}
+          Search results for "<strong>{{ search_query }}</strong>"
+        {% elif status_filter == 'all' %}All Appointments
+        {% else %}{{ status_filter | capitalize }} Appointments
+        {% endif %}
+        <span style="color:var(--muted);font-weight:400;font-size:12px;margin-left:6px">({{ appointments | length }})</span>
+      </div>
+      <div class="filter-pills">
+        <a href="{{ url_for('admin.appointments', q=search_query) }}"                         class="pill {% if status_filter == 'all' %}active{% endif %}">All</a>
+        <a href="{{ url_for('admin.appointments', status='pending', q=search_query) }}"        class="pill {% if status_filter == 'pending' %}active{% endif %}">Pending</a>
+        <a href="{{ url_for('admin.appointments', status='approved', q=search_query) }}"       class="pill {% if status_filter == 'approved' %}active{% endif %}">Approved</a>
+        <a href="{{ url_for('admin.appointments', status='rescheduled', q=search_query) }}"    class="pill {% if status_filter == 'rescheduled' %}active{% endif %}">Rescheduled</a>
+        <a href="{{ url_for('admin.appointments', status='cancelled', q=search_query) }}"      class="pill {% if status_filter == 'cancelled' %}active{% endif %}">Cancelled</a>
+        <a href="{{ url_for('admin.appointments', status='completed', q=search_query) }}"      class="pill {% if status_filter == 'completed' %}active{% endif %}">Completed</a>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      {% if appointments %}
+      <table>
+        <thead>
+          <tr>
+            <th>Ref #</th><th>Child / Patient</th><th>Guardian</th>
+            <th>Preferred Schedule</th><th>Reason</th><th>Status</th>
+            <th>Submitted</th><th style="text-align:right">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for apt in appointments %}
+          <tr onclick="window.location='{{ url_for('admin.appointment_detail', appointment_id=apt.id) }}'">
+            <td><span class="ref-tag">{{ apt.reference_number }}</span></td>
+            <td>
+              <div class="child-name">{{ apt.child_full_name }}</div>
+              <div class="sub-info">{{ apt.child_sex }} &middot; Born {{ apt.child_dob.strftime('%b %d, %Y') }}</div>
+            </td>
+            <td>
+              <div style="font-weight:500">{{ apt.guardian.full_name }}</div>
+              <div class="sub-info">{{ apt.guardian.phone }}</div>
+            </td>
+            <td>
+              <div style="font-weight:500">{{ apt.preferred_date.strftime('%b %d, %Y') }}</div>
+              <div class="sub-info">{{ apt.preferred_time }}</div>
+            </td>
+            <td>
+              <div style="max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ apt.reason }}</div>
+              <div class="sub-info">{{ apt.visit_type }}</div>
+            </td>
+            <td><span class="badge {{ apt.status_badge }}">{{ apt.status | capitalize }}</span></td>
+            <td><div class="sub-info">{{ apt.created_at.strftime('%b %d, %Y') }}</div></td>
+            <td style="text-align:right">
+              <a href="{{ url_for('admin.appointment_detail', appointment_id=apt.id) }}" class="review-btn" onclick="event.stopPropagation()">
+                Review
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="no-results">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        {% if search_query %}
+          <p>No results found for "<strong>{{ search_query }}</strong>".</p>
+          <a href="{{ url_for('admin.appointments', status=status_filter) }}">← Clear search</a>
+        {% else %}
+          <p>No {{ status_filter if status_filter != 'all' else '' }} appointments found.</p>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+</div>
+
+<script>
+  document.getElementById('live-date').textContent = new Date().toLocaleDateString('en-PH', {
+    weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'
+  });
+
+  // Auto-submit search on Enter; focus search on Ctrl+K / Cmd+K
+  const searchInput = document.getElementById('search-input');
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      searchInput.focus();
+      searchInput.select();
+    }
+  });
+
+  // Highlight matched text in table cells
+  const q = "{{ search_query | e }}".trim().toLowerCase();
+  if (q) {
+    document.querySelectorAll('tbody td').forEach(td => {
+      if (['ref-tag', 'review-btn'].some(c => td.querySelector('.' + c))) return;
+      td.innerHTML = td.innerHTML.replace(
+        new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'),
+        '<mark>$1</mark>'
+      );
+    });
+  }
+</script>
+</body>
+</html>

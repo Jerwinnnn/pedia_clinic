@@ -1,0 +1,314 @@
+
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --p:#1B5E4B;--pm:#2A7A62;--pl:#E8F5F0;--acc:#B8DDD0;
+  --tx:var(--color-text-primary);--mu:var(--color-text-secondary);
+  --bd:var(--color-border-tertiary);--bg:var(--color-background-tertiary);
+  --su:var(--color-background-secondary);--sr:var(--color-background-primary);
+}
+body{font-family:var(--font-sans);background:var(--bg);color:var(--tx);font-size:13px}
+.layout{display:grid;grid-template-columns:200px 1fr;min-height:600px}
+.sidebar{background:var(--p);display:flex;flex-direction:column;padding:0}
+.brand{padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px}
+.brand-icon{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.brand-name{color:#fff;font-size:15px;font-weight:500}
+.brand-sub{color:rgba(255,255,255,.45);font-size:10px;margin-top:1px}
+.snav{padding:12px 10px 6px}
+.snav-lbl{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.3);padding:0 6px;margin-bottom:5px;font-weight:500}
+.ni{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:7px;color:rgba(255,255,255,.6);font-size:12px;text-decoration:none;margin-bottom:1px;cursor:pointer;transition:all .15s}
+.ni:hover,.ni.active{background:rgba(255,255,255,.12);color:#fff}
+.ni i{font-size:15px;flex-shrink:0;opacity:.8}
+.ni.active i{opacity:1}
+.nbadge{margin-left:auto;background:#F59E0B;color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:8px}
+.sfoot{margin-top:auto;padding:12px 10px;border-top:1px solid rgba(255,255,255,.08)}
+.ucard{display:flex;align-items:center;gap:8px;padding:8px;border-radius:7px;background:rgba(255,255,255,.07);margin-bottom:6px}
+.uavt{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff}
+.uname{color:#fff;font-size:12px;font-weight:500}
+.urole{color:rgba(255,255,255,.4);font-size:10px}
+.logout{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:7px;color:rgba(255,255,255,.45);font-size:11px;cursor:pointer;transition:all .15s}
+.logout:hover{background:rgba(255,255,255,.08);color:rgba(255,255,255,.75)}
+
+.main{display:flex;flex-direction:column;overflow:hidden}
+.topbar{background:var(--sr);border-bottom:1px solid var(--bd);padding:13px 20px;display:flex;align-items:center;justify-content:space-between}
+.topbar h1{font-size:17px;font-weight:500}
+.topbar p{font-size:11px;color:var(--mu);margin-top:1px}
+.datebadge{font-size:11px;color:var(--mu);background:var(--su);border:0.5px solid var(--bd);padding:5px 10px;border-radius:16px}
+.content{padding:18px 20px;overflow-y:auto;flex:1}
+
+/* Stat cards */
+.sgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:18px}
+.scard{background:var(--sr);border:0.5px solid var(--bd);border-radius:10px;padding:14px 12px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.scard::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--bd)}
+.scard:hover{box-shadow:0 4px 12px rgba(0,0,0,.07)}
+.scard.active{border-color:var(--pm)}
+.scard.active::before{background:var(--pm)}
+.scard.cp.active::before{background:#F59E0B}
+.scard.ca.active::before{background:#10B981}
+.scard.cr.active::before{background:#3B82F6}
+.scard.cc.active::before{background:#EF4444}
+.sicon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.sicon i{font-size:14px}
+.si-all{background:var(--pl);color:var(--p)}
+.si-p{background:#FEF3CD;color:#78430A}
+.si-a{background:#D1FAE5;color:#065F46}
+.si-r{background:#DBEAFE;color:#1E3A8A}
+.si-c{background:#FEE2E2;color:#7F1D1D}
+.snum{font-size:26px;font-weight:500;color:var(--tx);line-height:1}
+.slbl{font-size:10px;color:var(--mu);margin-top:3px;font-weight:500}
+
+/* Chart section */
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.chart-card{background:var(--sr);border:0.5px solid var(--bd);border-radius:10px;padding:14px 16px}
+.chart-title{font-size:12px;font-weight:500;color:var(--tx);margin-bottom:2px}
+.chart-sub{font-size:10px;color:var(--mu);margin-bottom:12px}
+.bar-wrap{position:relative;height:120px}
+.donut-wrap{display:flex;align-items:center;gap:16px}
+.legend{display:flex;flex-direction:column;gap:6px}
+.leg-item{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--mu)}
+.leg-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+
+/* Today's appointments */
+.section-title{font-size:12px;font-weight:500;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+.section-title span{font-size:10px;color:var(--mu);font-weight:400}
+.apts-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.apt-card{background:var(--sr);border:0.5px solid var(--bd);border-radius:8px;padding:10px 12px;cursor:pointer;transition:all .15s}
+.apt-card:hover{border-color:var(--acc);background:var(--pl)}
+.apt-time{font-size:10px;color:var(--mu);margin-bottom:3px}
+.apt-name{font-size:12px;font-weight:500;color:var(--tx)}
+.apt-reason{font-size:10px;color:var(--mu);margin-top:1px}
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:12px;font-size:9px;font-weight:600;margin-top:5px}
+.badge::before{content:'';width:4px;height:4px;border-radius:50%;background:currentColor}
+.bp{background:#FEF3CD;color:#78430A}
+.ba{background:#D1FAE5;color:#065F46}
+.br{background:#DBEAFE;color:#1E3A8A}
+.bc{background:#FEE2E2;color:#7F1D1D}
+
+/* Table */
+.table-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.pills{display:flex;gap:5px}
+.pill{padding:3px 10px;border-radius:12px;border:0.5px solid var(--bd);font-size:10px;color:var(--mu);cursor:pointer;transition:all .15s}
+.pill:hover,.pill.active{background:var(--p);border-color:var(--p);color:#fff}
+.table-wrap{background:var(--sr);border:0.5px solid var(--bd);border-radius:10px;overflow:hidden}
+table{width:100%;border-collapse:collapse}
+th{padding:8px 12px;text-align:left;font-size:9px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;border-bottom:0.5px solid var(--bd);background:var(--su)}
+td{padding:10px 12px;font-size:11.5px;border-bottom:0.5px solid var(--bd);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tbody tr{cursor:pointer;transition:background .12s}
+tbody tr:hover td{background:var(--pl)}
+.ref{font-size:10px;background:var(--pl);color:var(--p);padding:2px 6px;border-radius:5px;font-weight:700;font-family:monospace}
+.sub{font-size:10px;color:var(--mu);margin-top:1px}
+.rev-btn{padding:4px 10px;border-radius:6px;font-size:10px;font-weight:500;border:0.5px solid var(--bd);background:var(--sr);color:var(--p);cursor:pointer;transition:all .15s}
+.rev-btn:hover{background:var(--p);color:#fff;border-color:var(--p)}
+</style>
+
+<div class="layout">
+<aside class="sidebar">
+  <div class="brand">
+    <div class="brand-icon"><i class="ti ti-shield-check" style="color:#fff;font-size:16px"></i></div>
+    <div><div class="brand-name">PediaCare</div><div class="brand-sub">Admin Portal</div></div>
+  </div>
+  <div class="snav">
+    <div class="snav-lbl">Main</div>
+    <div class="ni active"><i class="ti ti-layout-dashboard"></i>Dashboard</div>
+  </div>
+  <div class="snav">
+    <div class="snav-lbl">Appointments</div>
+    <div class="ni"><i class="ti ti-clock"></i>Pending<span class="nbadge">4</span></div>
+    <div class="ni"><i class="ti ti-circle-check"></i>Approved</div>
+    <div class="ni"><i class="ti ti-calendar-event"></i>Rescheduled</div>
+    <div class="ni"><i class="ti ti-circle-x"></i>Cancelled</div>
+    <div class="ni"><i class="ti ti-checks"></i>Completed</div>
+  </div>
+  <div class="sfoot">
+    <div class="ucard">
+      <div class="uavt">JA</div>
+      <div><div class="uname">Dr. Assistant</div><div class="urole">Clinic Assistant</div></div>
+    </div>
+    <div class="logout"><i class="ti ti-logout" style="font-size:13px"></i>Sign out</div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div><h1>Dashboard</h1><p>Overview of all appointment activity</p></div>
+    <div class="datebadge" id="topdate"></div>
+  </div>
+  <div class="content">
+
+    <!-- Stat cards -->
+    <div class="sgrid">
+      <div class="scard active">
+        <div class="sicon si-all"><i class="ti ti-layout-grid"></i></div>
+        <div class="snum">18</div><div class="slbl">Total</div>
+      </div>
+      <div class="scard cp">
+        <div class="sicon si-p"><i class="ti ti-clock"></i></div>
+        <div class="snum">4</div><div class="slbl">Pending</div>
+      </div>
+      <div class="scard ca">
+        <div class="sicon si-a"><i class="ti ti-check"></i></div>
+        <div class="snum">9</div><div class="slbl">Approved</div>
+      </div>
+      <div class="scard cr">
+        <div class="sicon si-r"><i class="ti ti-calendar-event"></i></div>
+        <div class="snum">3</div><div class="slbl">Rescheduled</div>
+      </div>
+      <div class="scard cc">
+        <div class="sicon si-c"><i class="ti ti-x"></i></div>
+        <div class="snum">2</div><div class="slbl">Cancelled</div>
+      </div>
+    </div>
+
+    <!-- Charts row -->
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title">Appointments per day</div>
+        <div class="chart-sub">Last 7 days</div>
+        <div class="bar-wrap"><canvas id="barChart" role="img" aria-label="Bar chart of appointments over last 7 days">Daily appointments: Mon 2, Tue 4, Wed 3, Thu 6, Fri 5, Sat 1, Sun 0</canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Appointment status</div>
+        <div class="chart-sub">All time breakdown</div>
+        <div class="donut-wrap">
+          <canvas id="donutChart" width="110" height="110" role="img" aria-label="Donut chart: 50% approved, 22% pending, 17% rescheduled, 11% cancelled">Status: 50% approved, 22% pending, 17% rescheduled, 11% cancelled</canvas>
+          <div class="legend">
+            <div class="leg-item"><div class="leg-dot" style="background:#10B981"></div>Approved — 50%</div>
+            <div class="leg-item"><div class="leg-dot" style="background:#F59E0B"></div>Pending — 22%</div>
+            <div class="leg-item"><div class="leg-dot" style="background:#3B82F6"></div>Rescheduled — 17%</div>
+            <div class="leg-item"><div class="leg-dot" style="background:#EF4444"></div>Cancelled — 11%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Today's appointments -->
+    <div class="section-title">Today's Appointments <span>Saturday, May 9</span></div>
+    <div class="apts-grid">
+      <div class="apt-card">
+        <div class="apt-time">8:00 AM – 9:00 AM</div>
+        <div class="apt-name">Liam Santos</div>
+        <div class="apt-reason">General Check-up</div>
+        <span class="badge ba">Approved</span>
+      </div>
+      <div class="apt-card">
+        <div class="apt-time">10:00 AM – 11:00 AM</div>
+        <div class="apt-name">Sofia Reyes</div>
+        <div class="apt-reason">Vaccination</div>
+        <span class="badge bp">Pending</span>
+      </div>
+      <div class="apt-card">
+        <div class="apt-time">2:00 PM – 3:00 PM</div>
+        <div class="apt-name">Marcus Cruz</div>
+        <div class="apt-reason">Sick visit / Consultation</div>
+        <span class="badge ba">Approved</span>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-hdr">
+      <div style="font-size:12px;font-weight:500">Recent appointments</div>
+      <div class="pills">
+        <div class="pill active">All</div>
+        <div class="pill">Pending</div>
+        <div class="pill">Approved</div>
+        <div class="pill">Rescheduled</div>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Ref #</th><th>Child</th><th>Guardian</th><th>Preferred schedule</th><th>Reason</th><th>Status</th><th></th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="ref">APT-48291</span></td>
+            <td><div style="font-weight:500">Liam Santos</div><div class="sub">Male · Born Mar 12, 2019</div></td>
+            <td><div>Maria Santos</div><div class="sub">09171234567</div></td>
+            <td><div>May 9, 2026</div><div class="sub">8:00 AM – 9:00 AM</div></td>
+            <td>General Check-up</td>
+            <td><span class="badge ba">Approved</span></td>
+            <td><button class="rev-btn">Review</button></td>
+          </tr>
+          <tr>
+            <td><span class="ref">APT-73812</span></td>
+            <td><div style="font-weight:500">Sofia Reyes</div><div class="sub">Female · Born Jul 4, 2021</div></td>
+            <td><div>Juan Reyes</div><div class="sub">09289876543</div></td>
+            <td><div>May 9, 2026</div><div class="sub">10:00 AM – 11:00 AM</div></td>
+            <td>Vaccination</td>
+            <td><span class="badge bp">Pending</span></td>
+            <td><button class="rev-btn">Review</button></td>
+          </tr>
+          <tr>
+            <td><span class="ref">APT-19034</span></td>
+            <td><div style="font-weight:500">Marcus Cruz</div><div class="sub">Male · Born Jan 30, 2020</div></td>
+            <td><div>Ana Cruz</div><div class="sub">09561239876</div></td>
+            <td><div>May 10, 2026</div><div class="sub">2:00 PM – 3:00 PM</div></td>
+            <td>Follow-up</td>
+            <td><span class="badge br">Rescheduled</span></td>
+            <td><button class="rev-btn">Review</button></td>
+          </tr>
+          <tr>
+            <td><span class="ref">APT-55210</span></td>
+            <td><div style="font-weight:500">Elena Gomez</div><div class="sub">Female · Born Nov 8, 2022</div></td>
+            <td><div>Pedro Gomez</div><div class="sub">09451230001</div></td>
+            <td><div>May 11, 2026</div><div class="sub">9:00 AM – 10:00 AM</div></td>
+            <td>Sick visit</td>
+            <td><span class="badge bp">Pending</span></td>
+            <td><button class="rev-btn">Review</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const d = new Date();
+document.getElementById('topdate').textContent = d.toLocaleDateString('en-PH',{weekday:'short',year:'numeric',month:'short',day:'numeric'});
+
+new Chart(document.getElementById('barChart'),{
+  type:'bar',
+  data:{
+    labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+    datasets:[{
+      label:'Appointments',
+      data:[2,4,3,6,5,1,0],
+      backgroundColor:'#2A7A62',
+      borderRadius:4,
+      borderSkipped:false
+    }]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false}},
+    scales:{
+      x:{grid:{display:false},ticks:{font:{size:10},color:'#5A7A72'}},
+      y:{grid:{color:'rgba(0,0,0,.04)'},ticks:{font:{size:10},color:'#5A7A72',stepSize:2},beginAtZero:true}
+    }
+  }
+});
+
+new Chart(document.getElementById('donutChart'),{
+  type:'doughnut',
+  data:{
+    labels:['Approved','Pending','Rescheduled','Cancelled'],
+    datasets:[{data:[9,4,3,2],backgroundColor:['#10B981','#F59E0B','#3B82F6','#EF4444'],borderWidth:0,hoverOffset:4}]
+  },
+  options:{
+    responsive:false,
+    cutout:'68%',
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+c.label+': '+c.raw}}}
+  }
+});
+
+document.querySelectorAll('.pill').forEach(p=>{
+  p.onclick=()=>{document.querySelectorAll('.pill').forEach(x=>x.classList.remove('active'));p.classList.add('active')};
+});
+document.querySelectorAll('.scard').forEach(c=>{
+  c.onclick=()=>{document.querySelectorAll('.scard').forEach(x=>x.classList.remove('active'));c.classList.add('active')};
+});
+</script>

@@ -36,6 +36,7 @@ class Guardian(db.Model):
     relationship = db.Column(db.String(50),  nullable=False)
     phone        = db.Column(db.String(20),  nullable=False)
     email        = db.Column(db.String(120), nullable=True)
+    address      = db.Column(db.String(255), nullable=True)
     created_at   = db.Column(db.DateTime, default=datetime.utcnow)
 
     # One guardian can have many appointments

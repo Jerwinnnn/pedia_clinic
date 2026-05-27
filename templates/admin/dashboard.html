@@ -4,139 +4,366 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard – PediaCare Admin</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
-
 </head>
 <body>
 <div class="layout">
 
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <div class="sidebar-logo">
-      <h2>PediaCare</h2>
-      <p>Admin Portal</p>
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        <path d="M9 12l2 2 4-4"/>
+      </svg>
     </div>
-    <nav>
-      <a href="{{ url_for('admin.dashboard') }}" class="nav-item active">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
-          <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
-        </svg>
-        Dashboard
-      </a>
-      <a href="{{ url_for('admin.dashboard', status='pending') }}" class="nav-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
-        </svg>
-        Appointment ({{ counts.pending }})
-      </a>
-    </nav>
-    <div class="sidebar-foot">
-      <div class="sidebar-user">
-        Logged in as<strong>{{ current_user.full_name }}</strong>
-      </div>
-      <a href="{{ url_for('admin.logout') }}" class="logout-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
-        </svg>
-        Sign out
-      </a>
+    <div>
+      <div class="brand-name">Napalinga's Children</div>
+      <div class="brand-sub">Clinic</div>
     </div>
   </div>
 
-  <!-- Main content -->
-  <div class="main">
-    <div class="topbar">
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Overview</div>
+    <a href="{{ url_for('admin.dashboard') }}" class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+        <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+      </svg>Dashboard
+    </a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Appointments</div>
+    <a href="{{ url_for('admin.appointments') }}" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+      </svg>All Appointments
+    </a>
+    <a href="{{ url_for('admin.appointments', status='pending') }}" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+      </svg>Pending
+      {% if counts.pending > 0 %}<span class="nav-badge">{{ counts.pending }}</span>{% endif %}
+    </a>
+    <a href="{{ url_for('admin.appointments', status='approved') }}" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/>
+      </svg>Approved
+    </a>
+    <a href="{{ url_for('admin.appointments', status='rescheduled') }}" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+      </svg>Rescheduled
+    </a>
+    <a href="{{ url_for('admin.appointments', status='cancelled') }}" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/>
+      </svg>Cancelled
+    </a>
+    <a href="{{ url_for('admin.appointments', status='completed') }}" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+      </svg>Completed
+    </a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Settings</div>
+    <a href="{{ url_for('admin.users') }}" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      User Management
+    </a>
+  </div>
+
+  <div class="sidebar-foot">
+    <div class="user-card">
+      <div class="user-avatar">{{ current_user.full_name[0] | upper }}</div>
       <div>
-        <h1>Appointments</h1>
-        <div class="topbar-sub">Manage and respond to patient appointment requests</div>
+        <div class="user-name">{{ current_user.full_name }}</div>
+        <div class="user-role">Clinic Assistant</div>
+      </div>
+    </div>
+    <a href="{{ url_for('admin.logout') }}" class="logout-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
+      </svg>Sign out
+    </a>
+  </div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>Dashboard</h1>
+      <p>Overview of clinic appointment activity</p>
+    </div>
+    <div class="topbar-date" id="live-date"></div>
+  </div>
+
+  <div class="content">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">
+          {% if category == 'success' %}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+          {% else %}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+          {% endif %}
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endwith %}
+
+    <!-- ── Stat Cards ── -->
+    <div class="stat-grid">
+      <a href="{{ url_for('admin.appointments') }}" class="stat-card">
+        <div class="stat-icon si-all">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        </div>
+        <div class="stat-num">{{ counts.all }}</div>
+        <div class="stat-label">Total</div>
+      </a>
+      <a href="{{ url_for('admin.appointments', status='pending') }}" class="stat-card c-pending">
+        <div class="stat-icon si-pend">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        </div>
+        <div class="stat-num">{{ counts.pending }}</div>
+        <div class="stat-label">Pending</div>
+      </a>
+      <a href="{{ url_for('admin.appointments', status='approved') }}" class="stat-card c-approved">
+        <div class="stat-icon si-appr">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+        </div>
+        <div class="stat-num">{{ counts.approved }}</div>
+        <div class="stat-label">Approved</div>
+      </a>
+      <a href="{{ url_for('admin.appointments', status='rescheduled') }}" class="stat-card c-rescheduled">
+        <div class="stat-icon si-resc">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        </div>
+        <div class="stat-num">{{ counts.rescheduled }}</div>
+        <div class="stat-label">Rescheduled</div>
+      </a>
+      <a href="{{ url_for('admin.appointments', status='cancelled') }}" class="stat-card c-cancelled">
+        <div class="stat-icon si-canc">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+        </div>
+        <div class="stat-num">{{ counts.cancelled }}</div>
+        <div class="stat-label">Cancelled</div>
+      </a>
+    </div>
+
+    <!-- ── Charts ── -->
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-card-title">Appointments per day</div>
+        <div class="chart-card-sub">Submissions over the last 7 days</div>
+        <div class="bar-wrap">
+          <canvas id="barChart" role="img" aria-label="Bar chart of daily appointments for the last 7 days"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-title">Status breakdown</div>
+        <div class="chart-card-sub">All-time distribution</div>
+        <div class="donut-section">
+          <div class="donut-wrap">
+            <canvas id="donutChart" width="130" height="130" role="img" aria-label="Donut chart of appointment statuses"></canvas>
+          </div>
+          <div class="legend">
+            <div class="leg-item"><div class="leg-dot" style="background:#10B981"></div>Approved<span class="leg-count">{{ counts.approved }}</span></div>
+            <div class="leg-item"><div class="leg-dot" style="background:#F59E0B"></div>Pending<span class="leg-count">{{ counts.pending }}</span></div>
+            <div class="leg-item"><div class="leg-dot" style="background:#3B82F6"></div>Rescheduled<span class="leg-count">{{ counts.rescheduled }}</span></div>
+            <div class="leg-item"><div class="leg-dot" style="background:#EF4444"></div>Cancelled<span class="leg-count">{{ counts.cancelled }}</span></div>
+            <div class="leg-item"><div class="leg-dot" style="background:#6B7280"></div>Completed<span class="leg-count">{{ counts.completed }}</span></div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="content">
-
-      {% with messages = get_flashed_messages(with_categories=true) %}
-        {% for category, message in messages %}
-          <div class="flash {{ category }}">{{ message }}</div>
-        {% endfor %}
-      {% endwith %}
-
-      <!-- Stat cards -->
-      <div class="stat-grid">
-        <a href="{{ url_for('admin.dashboard') }}" class="stat-card {% if status_filter == 'all' %}active-filter{% endif %}">
-          <div class="stat-num">{{ counts.all }}</div>
-          <div class="stat-label">All</div>
-        </a>
-        <a href="{{ url_for('admin.dashboard', status='pending') }}" class="stat-card {% if status_filter == 'pending' %}active-filter{% endif %}">
-          <div class="stat-num">{{ counts.pending }}</div>
-          <div class="stat-label"><span class="stat-dot" style="background:#856404"></span>Pending</div>
-        </a>
-        <a href="{{ url_for('admin.dashboard', status='approved') }}" class="stat-card {% if status_filter == 'approved' %}active-filter{% endif %}">
-          <div class="stat-num">{{ counts.approved }}</div>
-          <div class="stat-label"><span class="stat-dot" style="background:#155724"></span>Approved</div>
-        </a>
-        <a href="{{ url_for('admin.dashboard', status='rescheduled') }}" class="stat-card {% if status_filter == 'rescheduled' %}active-filter{% endif %}">
-          <div class="stat-num">{{ counts.rescheduled }}</div>
-          <div class="stat-label"><span class="stat-dot" style="background:#0C5460"></span>Rescheduled</div>
-        </a>
-        <a href="{{ url_for('admin.dashboard', status='cancelled') }}" class="stat-card {% if status_filter == 'cancelled' %}active-filter{% endif %}">
-          <div class="stat-num">{{ counts.cancelled }}</div>
-          <div class="stat-label"><span class="stat-dot" style="background:#721C24"></span>Cancelled</div>
-        </a>
-      </div>
-
-      <!-- Appointments table -->
-      <div class="table-wrap">
-        {% if appointments %}
-        <table>
-          <thead>
-            <tr>
-              <th>Ref #</th>
-              <th>Child</th>
-              <th>Guardian</th>
-              <th>Preferred Date</th>
-              <th>Reason</th>
-              <th>Status</th>
-              <th>Submitted</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for apt in appointments %}
-            <tr>
-              <td><span class="ref">{{ apt.reference_number }}</span></td>
-              <td>
-                <div class="child-name">{{ apt.child_full_name }}</div>
-                <div class="sub-text">{{ apt.child_sex }} · DOB {{ apt.child_dob.strftime('%b %d, %Y') }}</div>
-              </td>
-              <td>
-                <div>{{ apt.guardian.full_name }}</div>
-                <div class="sub-text">{{ apt.guardian.phone }}</div>
-              </td>
-              <td>
-                <div>{{ apt.preferred_date.strftime('%b %d, %Y') }}</div>
-                <div class="sub-text">{{ apt.preferred_time }}</div>
-              </td>
-              <td>{{ apt.reason }}</td>
-              <td><span class="badge {{ apt.status_badge }}">{{ apt.status | capitalize }}</span></td>
-              <td><div class="sub-text">{{ apt.created_at.strftime('%b %d, %Y') }}</div></td>
-              <td>
-                <a href="{{ url_for('admin.appointment_detail', appointment_id=apt.id) }}" class="action-btn">
-                  Review
-                </a>
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-        {% else %}
-        <div class="empty">No appointments found.</div>
-        {% endif %}
-      </div>
-
+    <!-- ── Today's Appointments ── -->
+    <div class="section-hdr">
+      <div class="section-title">Today's Appointments</div>
+      <div class="section-sub" id="today-label"></div>
     </div>
+
+    {% set today_apts = [] %}
+    {% for apt in all_appointments %}
+      {% if apt.preferred_date.strftime('%Y-%m-%d') == today_str %}
+        {% set _ = today_apts.append(apt) %}
+      {% endif %}
+    {% endfor %}
+
+    {% if today_apts %}
+    <div class="today-grid">
+      {% for apt in today_apts %}
+      <a href="{{ url_for('admin.appointment_detail', appointment_id=apt.id) }}" class="today-card">
+        <div class="today-time">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          {{ apt.preferred_time }}
+        </div>
+        <div class="today-name">{{ apt.child_full_name }}</div>
+        <div class="today-reason">{{ apt.reason }}</div>
+        <span class="badge {{ apt.status_badge }}">{{ apt.status | capitalize }}</span>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="today-empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      No appointments scheduled for today.
+    </div>
+    {% endif %}
+
+    <!-- ── Recent History ── -->
+    <div class="table-header">
+      <div class="table-title">
+        Recent Appointment History
+        <span style="color:var(--muted);font-weight:400;font-size:12px;margin-left:6px">({{ all_appointments[:10] | length }} of {{ counts.all }})</span>
+      </div>
+      <a href="{{ url_for('admin.appointments') }}" class="review-btn">
+        View all
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+    </div>
+
+    <div class="table-wrap">
+      {% if all_appointments %}
+      <table>
+        <thead>
+          <tr>
+            <th>Ref #</th>
+            <th>Child / Patient</th>
+            <th>Guardian</th>
+            <th>Schedule</th>
+            <th>Reason</th>
+            <th>Status</th>
+            <th>Submitted</th>
+            <th style="text-align:right">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for apt in all_appointments[:10] %}
+          <tr onclick="window.location='{{ url_for('admin.appointment_detail', appointment_id=apt.id) }}'">
+            <td><span class="ref-tag">{{ apt.reference_number }}</span></td>
+            <td>
+              <div class="child-name">{{ apt.child_full_name }}</div>
+              <div class="sub-info">{{ apt.child_sex }} &middot; Born {{ apt.child_dob.strftime('%b %d, %Y') }}</div>
+            </td>
+            <td>
+              <div style="font-weight:500">{{ apt.guardian.full_name }}</div>
+              <div class="sub-info">{{ apt.guardian.phone }}</div>
+            </td>
+            <td>
+              <div style="font-weight:500">{{ apt.preferred_date.strftime('%b %d, %Y') }}</div>
+              <div class="sub-info">{{ apt.preferred_time }}</div>
+            </td>
+            <td>
+              <div style="max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ apt.reason }}</div>
+              <div class="sub-info">{{ apt.visit_type }}</div>
+            </td>
+            <td><span class="badge {{ apt.status_badge }}">{{ apt.status | capitalize }}</span></td>
+            <td><div class="sub-info">{{ apt.created_at.strftime('%b %d, %Y') }}</div></td>
+            <td style="text-align:right">
+              <a href="{{ url_for('admin.appointment_detail', appointment_id=apt.id) }}" class="review-btn" onclick="event.stopPropagation()">
+                Review
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        <p>No appointments yet.</p>
+      </div>
+      {% endif %}
+    </div>
+
   </div>
 </div>
+</div>
+
+<script>
+  // Live dates
+  const now = new Date();
+  document.getElementById('live-date').textContent = now.toLocaleDateString('en-PH', {
+    weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'
+  });
+  document.getElementById('today-label').textContent = now.toLocaleDateString('en-PH', {
+    weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
+  });
+
+  // Bar chart
+  new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+      labels: {{ bar_labels | tojson }},
+      datasets: [{
+        label: 'Appointments',
+        data: {{ bar_data | tojson }},
+        backgroundColor: '#2A7A62',
+        hoverBackgroundColor: '#1B5E4B',
+        borderRadius: 6,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { font: { size: 11 }, color: '#5A7A72' }
+        },
+        y: {
+          beginAtZero: true,
+          grid: { color: 'rgba(0,0,0,0.04)', drawBorder: false },
+          ticks: { font: { size: 11 }, color: '#5A7A72', stepSize: 1, precision: 0 }
+        }
+      }
+    }
+  });
+
+  // Donut chart
+  const total = {{ counts.all }};
+  new Chart(document.getElementById('donutChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Approved', 'Pending', 'Rescheduled', 'Cancelled', 'Completed'],
+      datasets: [{
+        data: [
+          {{ counts.approved }}, {{ counts.pending }},
+          {{ counts.rescheduled }}, {{ counts.cancelled }}, {{ counts.completed }}
+        ],
+        backgroundColor: ['#10B981','#F59E0B','#3B82F6','#EF4444','#6B7280'],
+        borderWidth: 2,
+        borderColor: '#fff',
+        hoverOffset: 5,
+      }]
+    },
+    options: {
+      responsive: false, cutout: '70%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const pct = total > 0 ? Math.round((ctx.raw / total) * 100) : 0;
+              return ' ' + ctx.label + ': ' + ctx.raw + ' (' + pct + '%)';
+            }
+          }
+        }
+      }
+    }
+  });
+</script>
 </body>
 </html>

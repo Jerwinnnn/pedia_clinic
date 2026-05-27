@@ -6,7 +6,6 @@
 <title>PediaCare Clinic – Appointment Request</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-
 </head>
 <body>
 
@@ -18,8 +17,8 @@
     </svg>
   </div>
   <div>
-    <div class="header-title">PediaCare Clinic</div>
-    <div class="header-sub">Appointment Request System</div>
+    <div class="header-title">Napalinga Childrens' Clinic</div>
+    <div class="header-sub">Appointment Request</div>
   </div>
 </div>
 
@@ -67,12 +66,12 @@
           <div class="field">
             <label>First name <span class="req">*</span></label>
             <input type="text" id="g_fname" placeholder="e.g. Maria">
-            <div class="err-msg" id="err_g_fname">This field is required.</div>
+            <div class="err-msg" id="err_g_fname">Please enter a valid first name (letters only, min 2 characters).</div>
           </div>
           <div class="field">
             <label>Last name <span class="req">*</span></label>
             <input type="text" id="g_lname" placeholder="e.g. Santos">
-            <div class="err-msg" id="err_g_lname">This field is required.</div>
+            <div class="err-msg" id="err_g_lname">Please enter a valid last name (letters only, min 2 characters).</div>
           </div>
         </div>
         <div class="field">
@@ -85,20 +84,26 @@
             <option>Grandparent</option>
             <option>Other</option>
           </select>
-          <div class="err-msg" id="err_g_relation">Please select your relationship.</div>
+          <div class="err-msg" id="err_g_relation">Please select your relationship to the child.</div>
         </div>
         <div class="divider"></div>
         <div class="section-label">Contact information</div>
         <div class="field">
+          <label>Address</label>
+          <input type="text" id="g_address" placeholder="e.g. 123 Main St, City">
+          <div class="hint">Optional — for mail reminders.</div>
+        </div>
+        <div class="field">
           <label>Mobile number <span class="req">*</span></label>
           <input type="tel" id="g_phone" placeholder="e.g. 09171234567">
-          <div class="hint">We will send appointment updates to this number via SMS.</div>
-          <div class="err-msg" id="err_g_phone">Enter a valid PH mobile number (09xxxxxxxxx).</div>
+          <div class="hint">We will send appointment updates to this number.</div>
+          <div class="err-msg" id="err_g_phone">Mobile number must be 11 digits starting with 09 (e.g. 09171234567).</div>
         </div>
         <div class="field">
           <label>Email address</label>
           <input type="email" id="g_email" placeholder="e.g. maria@email.com">
           <div class="hint">Optional — for email reminders.</div>
+          <div class="err-msg" id="err_g_email">Please enter a valid email address (e.g. name@email.com).</div>
         </div>
       </div>
     </div>
@@ -134,19 +139,21 @@
           <div class="field">
             <label>First name <span class="req">*</span></label>
             <input type="text" id="c_fname" placeholder="Child's first name">
-            <div class="err-msg" id="err_c_fname">This field is required.</div>
+            <div class="err-msg" id="err_c_fname">Please enter a valid first name (letters only, min 2 characters).</div>
           </div>
           <div class="field">
             <label>Last name <span class="req">*</span></label>
             <input type="text" id="c_lname" placeholder="Child's last name">
-            <div class="err-msg" id="err_c_lname">This field is required.</div>
+            <div class="err-msg" id="err_c_lname">Please enter a valid last name (letters only, min 2 characters).</div>
           </div>
         </div>
         <div class="row">
           <div class="field">
             <label>Date of birth <span class="req">*</span></label>
             <input type="date" id="c_dob">
-            <div class="err-msg" id="err_c_dob">Please enter the date of birth.</div>
+            <div class="err-msg" id="err_c_dob">Please enter the child's date of birth.</div>
+            <div class="err-msg" id="err_c_dob_future">Date of birth cannot be in the future.</div>
+            <div class="err-msg" id="err_c_dob_age">This clinic serves patients 18 years old and below only.</div>
           </div>
           <div class="field">
             <label>Sex <span class="req">*</span></label>
@@ -155,7 +162,7 @@
               <option>Male</option>
               <option>Female</option>
             </select>
-            <div class="err-msg" id="err_c_sex">Please select sex.</div>
+            <div class="err-msg" id="err_c_sex">Please select the child's sex.</div>
           </div>
         </div>
         <div class="divider"></div>
@@ -229,14 +236,15 @@
             <circle cx="12" cy="12" r="10"/>
             <path d="M12 8v4m0 4h.01"/>
           </svg>
-          <div>Your preferred schedule is subject to the doctor's availability. The clinic assistant will confirm your appointment via SMS.</div>
+          <div>Your preferred schedule is subject to the doctor's availability. The clinic is open Monday to Friday only. The clinic assistant will confirm your appointment via email.</div>
         </div>
         <div class="section-label">Date &amp; time</div>
         <div class="row">
           <div class="field">
             <label>Preferred date <span class="req">*</span></label>
             <input type="date" id="s_date">
-            <div class="err-msg" id="err_s_date">Please select a date.</div>
+            <div class="err-msg" id="err_s_date">Please select a preferred date.</div>
+            <div class="err-msg" id="err_s_date_weekend">The clinic is closed on weekends. Please select a weekday (Monday to Friday).</div>
           </div>
           <div class="field">
             <label>Preferred time slot <span class="req">*</span></label>
@@ -251,13 +259,13 @@
               <option>3:00 PM – 4:00 PM</option>
               <option>4:00 PM – 5:00 PM</option>
             </select>
-            <div class="err-msg" id="err_s_time">Please select a time slot.</div>
+            <div class="err-msg" id="err_s_time">Please select a preferred time slot.</div>
           </div>
         </div>
         <div class="field">
           <label>Alternative date (optional)</label>
           <input type="date" id="s_alt_date">
-          <div class="hint">In case your first choice is unavailable.</div>
+          <div class="hint">In case your first choice is unavailable. Must also be a weekday.</div>
         </div>
         <div class="divider"></div>
         <div class="section-label">Visit type</div>
@@ -274,7 +282,7 @@
               Teleconsultation (video call)
             </label>
           </div>
-          <div class="err-msg" id="err_vtype">Please select a visit type.</div>
+          <div class="err-msg" id="err_vtype">Please select a visit type (in-person or teleconsultation).</div>
         </div>
       </div>
     </div>
@@ -317,7 +325,7 @@
             <circle cx="12" cy="12" r="10"/>
             <path d="M12 8v4m0 4h.01"/>
           </svg>
-          <div>By submitting, you agree that the clinic staff will contact you via SMS at the number provided to confirm your appointment schedule.</div>
+          <div>By submitting, you agree that the clinic staff will contact you at the number or email provided to confirm your appointment schedule.</div>
         </div>
       </div>
     </div>
@@ -348,7 +356,7 @@
             </svg>
           </div>
           <div class="success-title">Appointment Submitted!</div>
-          <div class="success-sub">Your appointment request has been received. The clinic assistant will review your request and send you an SMS confirmation shortly.</div>
+          <div class="success-sub">Your appointment request has been received. The clinic assistant will review your request and send you a confirmation shortly.</div>
           <div class="ref-box" id="ref-num">APT-00000</div>
           <div class="ref-label">Reference number — save this for your records</div>
           <div style="margin-top:24px;font-size:13px;color:var(--muted)">
@@ -360,6 +368,25 @@
   </div>
 
 </div>
+
+<!-- Validation Toast -->
+<div class="val-toast" id="valToast">
+  <div class="val-toast-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+      <circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/>
+    </svg>
+  </div>
+  <div style="flex:1">
+    <div class="val-toast-title" id="valToastTitle">Please fix the following</div>
+    <div class="val-toast-body" id="valToastBody"></div>
+  </div>
+  <button class="val-toast-close" onclick="hideToast()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+      <path d="M18 6L6 18M6 6l12 12"/>
+    </svg>
+  </button>
+</div>
+
 <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>
